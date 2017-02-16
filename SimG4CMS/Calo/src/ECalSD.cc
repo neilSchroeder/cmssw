@@ -26,6 +26,9 @@
 
 #include "G4SystemOfUnits.hh"
 
+#include "TH1.h"
+#include "TFile.h"
+
 #include<algorithm>
 
 //#define DebugLog
@@ -70,7 +73,7 @@ ECalSD::ECalSD(G4String name, const DDCompactView & cpv,
   ageingWithSlopeLY   = m_EC.getUntrackedParameter<bool>("AgeingWithSlopeLY", false);
   if(ageingWithSlopeLY) ageing.setLumies(p.getParameter<edm::ParameterSet>("ECalSD").getParameter<double>("DelivLuminosity"),
 					 p.getParameter<edm::ParameterSet>("ECalSD").getParameter<double>("InstLuminosity"));
-
+  
   //Material list for HB/HE/HO sensitive detectors
   std::string attribute = "ReadOutName";
   DDSpecificsFilter filter;
@@ -398,11 +401,17 @@ double ECalSD::curve_LY(G4Step* aStep) {
   double crlength = crystalLength(lv);
 
   if(ageingWithSlopeLY){
+
     //position along the crystal in mm from 0 to 230 (in EB)
     double depth = 0.5 * crlength + localPoint.z();
-
-    if (depth >= -0.1 || depth <= crlength+0.1)
-      weight = ageing.calcLightCollectionEfficiencyWeighted(currentID.unitID(), depth/crlength);
+    double relDepth = depth/crlength;
+    //Establish new weights for ageingWithSlopeLY
+    TFile* readWeight = new TFile("/afs/cern.ch/user/n/nschroed/public/DamageFiles_Modified.root", "Read");
+    TH1F* centralDamage = (TH1F*)readWeight->Get("Damage_Profile_Central");
+    Int_t bin = centralDamage->GetBin(relDepth); //return appropriate bin # from relative depth
+    weight = centralDamage->GetBinContent(bin);  //return appropriate weight from bin #
+    readWeight->Close();
+    delete readWeight;
   }
   else{
     double dapd = 0.5 * crlength - localPoint.z();

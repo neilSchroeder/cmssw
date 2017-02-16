@@ -131,10 +131,10 @@ def filesFromDASQuery(query,option="",s=None):
 	print "the query is",query
 	eC=5
 	count=0
-	while eC!=0 and count<3:
+	while eC!=0 and count<200:
 		if count!=0:
 			print 'Sleeping, then retrying DAS'
-			time.sleep(100)
+			time.sleep(5)
 		p = Popen('das_client %s --query "%s"'%(option,query), stdout=PIPE,shell=True)
                 pipe=p.stdout.read()
 		tupleP = os.waitpid(p.pid, 0)

@@ -266,7 +266,7 @@ g4SimHits = cms.EDProducer("OscarMTProducer",
         TestBeam        = cms.untracked.bool(False),
         NullNumbering   = cms.untracked.bool(False),
         StoreRadLength  = cms.untracked.bool(False),
-        AgeingWithSlopeLY  = cms.untracked.bool(False)
+        AgeingWithSlopeLY  = cms.untracked.bool(True)
     ),
     HCalSD = cms.PSet(
         common_UseLuminosity,
